@@ -8,15 +8,19 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "dev:server": "cd .. && json-server --host 0.0.0.0 --port 3000 --watch db.json",
+    "dev": "start-server-and-test \"npm run dev:server\" http://localhost:3000 \"npm run start\""
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "@shopify/flash-list": "1.7.6",
     "@tamagui/config": "^1.132.22",
     "@tamagui/core": "^1.132.22",
+    "axios": "^1.11.0",
     "expo": "~53.0.22",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.7",
@@ -42,14 +46,14 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "tailwindcss": "^3.4.17",
-    "tamagui": "^1.132.22",
-    "@shopify/flash-list": "1.7.6"
+    "tamagui": "^1.132.22"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
+    "start-server-and-test": "^2.0.13",
     "typescript": "~5.8.3"
   },
   "private": true
