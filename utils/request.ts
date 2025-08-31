@@ -3,7 +3,7 @@ import axios from "axios";
 
 // 创建 axios 实例
 const request = axios.create({
-  baseURL: "http://192.168.18.36:3000", // 你的后端地址
+  baseURL: "http://192.168.18.38:3000", // 你的后端地址
   timeout: 10000, // 超时时间 10s
   headers: {
     "Content-Type": "application/json",
@@ -46,4 +46,8 @@ export default request;
 
 export function get<T>(url: string) {
   return request.get<any, T>(url);
+}
+
+export function put<T>(url: string, data: any) {
+  return request.put<any, T>(url, data);
 }

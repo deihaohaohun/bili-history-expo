@@ -14,12 +14,14 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
+    "@gorhom/bottom-sheet": "^5.2.3",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
     "@shopify/flash-list": "1.7.6",
     "@tamagui/config": "^1.132.22",
     "@tamagui/core": "^1.132.22",
+    "@tamagui/input": "^1.132.23",
     "axios": "^1.11.0",
     "expo": "~53.0.22",
     "expo-blur": "~14.1.5",
@@ -45,6 +47,7 @@
     "react-native-screens": "~4.11.1",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
+    "react-native-worklets": "^0.4.2",
     "tailwindcss": "^3.4.17",
     "tamagui": "^1.132.22"
   },
