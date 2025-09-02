@@ -15,6 +15,7 @@ import {
   GestureHandlerRootView,
   Pressable,
 } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
 import { Button, Input, Text } from "tamagui";
 
 // Tamagui 配置
@@ -31,6 +32,8 @@ interface Video {
   title: string;
   image: string;
   total: number;
+  status: string;
+  current: number;
 }
 
 export default function App() {
@@ -38,17 +41,15 @@ export default function App() {
   const [refreshing, setRefreshing] = useState(false);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [id, setId] = useState(0);
-  const currentVideo = videos.find((video) => video.id === id);
+  const currentVideo = videos.find((video) => video.id === id)!;
+  const [current, setCurrent] = useState(0);
 
   // callbacks
-  const handlePresentModalPress = useCallback((id: number) => {
+  const handlePresentModalPress = useCallback((id: number, current: number) => {
     setId(id);
+    setCurrent(current);
     bottomSheetModalRef.current?.present();
   }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
-
   const renderBackdrop = useCallback(
     (props: any) => (
       <BottomSheetBackdrop
@@ -96,7 +97,7 @@ export default function App() {
               renderItem={({ item }) => (
                 <Pressable
                   onPress={() => {
-                    handlePresentModalPress(item.id);
+                    handlePresentModalPress(item.id, item.current);
                   }}
                 >
                   <View
@@ -123,6 +124,39 @@ export default function App() {
                         {item.title}
                       </Text>
                       <Text style={{ color: "#666" }}>全 {item.total} 话</Text>
+                      {item.status === "doing" && (
+                        <Text
+                          style={{
+                            color: "#999",
+                            fontSize: 12,
+                            textAlign: "right",
+                          }}
+                        >
+                          当前看到 {item.current} 话
+                        </Text>
+                      )}
+                      {item.status === "done" && (
+                        <Text
+                          style={{
+                            color: "#999",
+                            fontSize: 12,
+                            textAlign: "right",
+                          }}
+                        >
+                          已看完
+                        </Text>
+                      )}
+                      {item.status === "todo" && (
+                        <Text
+                          style={{
+                            color: "#999",
+                            fontSize: 12,
+                            textAlign: "right",
+                          }}
+                        >
+                          未观看
+                        </Text>
+                      )}
                     </View>
                   </View>
                 </Pressable>
@@ -153,7 +187,6 @@ export default function App() {
 
           <BottomSheetModal
             ref={bottomSheetModalRef}
-            onChange={handleSheetChanges}
             snapPoints={["70%"]}
             enableDismissOnClose
             backdropComponent={renderBackdrop}
@@ -161,6 +194,9 @@ export default function App() {
             enableDynamicSizing={false}
           >
             <BottomSheetView>
+              <Text style={{ fontSize: 20, textAlign: "center" }}>
+                {currentVideo?.title}
+              </Text>
               <View
                 style={{
                   flexDirection: "row",
@@ -169,17 +205,62 @@ export default function App() {
                   flex: 1,
                 }}
               >
-                <Button size="$4">-</Button>
-                <Input style={{ flex: 1 }} size="$4" borderWidth={2} />
-                <Button size="$4">+</Button>
+                <Button
+                  size="$4"
+                  onPress={() => {
+                    setCurrent((c) => {
+                      if (c - 1 <= 0) {
+                        Toast.show({
+                          type: "error",
+                          text1: "提醒",
+                          text2: "不能再减少了",
+                          topOffset: 60,
+                        });
+                        return 1;
+                      }
+                      return c - 1;
+                    });
+                  }}
+                  disabled={currentVideo?.status === "done"}
+                >
+                  -
+                </Button>
+                <Input
+                  style={{ flex: 1 }}
+                  size="$4"
+                  borderWidth={2}
+                  value={current + ""}
+                  disabled
+                />
+                <Button
+                  size="$4"
+                  onPress={() => {
+                    setCurrent((c) => {
+                      if (c + 1 >= currentVideo.total) {
+                        Toast.show({
+                          type: "error",
+                          text1: "提醒",
+                          text2: "不能再增加了",
+                          topOffset: 60,
+                        });
+                        return currentVideo?.total;
+                      }
+                      return c + 1;
+                    });
+                  }}
+                  disabled={currentVideo?.status === "done"}
+                >
+                  +
+                </Button>
               </View>
-              <Button style={{ margin: 12, marginTop: 0 }} size="$4">
-                添加进度
-              </Button>
-              <Button style={{ margin: 12, marginTop: 0 }} size="$4">
+              <Button
+                theme="red"
+                style={{ margin: 12, marginTop: 0 }}
+                size="$4"
+                disabled={currentVideo?.status === "done"}
+              >
                 标记为已看过
               </Button>
-              <Text>{currentVideo?.title}</Text>
             </BottomSheetView>
           </BottomSheetModal>
         </BottomSheetModalProvider>
