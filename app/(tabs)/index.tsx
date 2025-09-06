@@ -1,4 +1,5 @@
-import { get } from "@/utils/request";
+import { getVideoList, updateVideo } from "@/apis/video";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -27,7 +28,7 @@ declare module "@tamagui/core" {
   interface TamaguiCustomConfig extends Conf {}
 }
 
-interface Video {
+export interface Video {
   id: number;
   title: string;
   image: string;
@@ -43,6 +44,7 @@ export default function App() {
   const [id, setId] = useState(0);
   const currentVideo = videos.find((video) => video.id === id)!;
   const [current, setCurrent] = useState(0);
+  const colorScheme = useColorScheme();
 
   // callbacks
   const handlePresentModalPress = useCallback((id: number, current: number) => {
@@ -66,24 +68,45 @@ export default function App() {
     []
   );
 
-  const getVideos = async () => {
-    const res = await get<Video[]>("/videos");
-    return res;
-  };
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    getVideos().then((res) => {
-      setVideos(res);
-      setRefreshing(false);
-    });
-  };
-
   useEffect(() => {
-    getVideos().then((res) => {
+    getVideoList().then((res) => {
       setVideos(res);
     });
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const res = await getVideoList();
+    setVideos(res);
+    setRefreshing(false);
+  };
+
+  const addVideoProgress = async () => {
+    setCurrent((c) => {
+      if (c + 1 >= currentVideo.total) {
+        Toast.show({
+          type: "error",
+          text1: "提醒",
+          text2: "不能再增加了",
+          topOffset: 60,
+        });
+        return currentVideo?.total;
+      }
+      return c + 1;
+    });
+    await updateVideo(id, {
+      ...currentVideo,
+      current: current + 1,
+    });
+    onRefresh();
+    // toast 提示
+    Toast.show({
+      type: "success",
+      text1: "提醒",
+      text2: "增加成功",
+      topOffset: 60,
+    });
+  };
 
   return (
     <TamaguiProvider config={config}>
@@ -102,7 +125,8 @@ export default function App() {
                 >
                   <View
                     style={{
-                      backgroundColor: "#fff",
+                      backgroundColor:
+                        colorScheme === "light" ? "#fff" : "#222",
                       margin: 4,
                       borderRadius: 8,
                       overflow: "hidden",
@@ -117,17 +141,26 @@ export default function App() {
                     />
                     <View style={{ padding: 4 }}>
                       <Text
-                        style={{ fontSize: 16 }}
+                        style={{
+                          fontSize: 16,
+                          color: colorScheme === "light" ? "#222" : "#fff",
+                        }}
                         numberOfLines={1}
                         ellipsizeMode="tail"
                       >
                         {item.title}
                       </Text>
-                      <Text style={{ color: "#666" }}>全 {item.total} 话</Text>
+                      <Text
+                        style={{
+                          color: colorScheme === "light" ? "#222" : "#fff",
+                        }}
+                      >
+                        全 {item.total} 话
+                      </Text>
                       {item.status === "doing" && (
                         <Text
                           style={{
-                            color: "#999",
+                            color: colorScheme === "light" ? "#222" : "#fff",
                             fontSize: 12,
                             textAlign: "right",
                           }}
@@ -138,7 +171,7 @@ export default function App() {
                       {item.status === "done" && (
                         <Text
                           style={{
-                            color: "#999",
+                            color: colorScheme === "light" ? "#222" : "#fff",
                             fontSize: 12,
                             textAlign: "right",
                           }}
@@ -149,7 +182,7 @@ export default function App() {
                       {item.status === "todo" && (
                         <Text
                           style={{
-                            color: "#999",
+                            color: colorScheme === "light" ? "#222" : "#fff",
                             fontSize: 12,
                             textAlign: "right",
                           }}
@@ -205,26 +238,6 @@ export default function App() {
                   flex: 1,
                 }}
               >
-                <Button
-                  size="$4"
-                  onPress={() => {
-                    setCurrent((c) => {
-                      if (c - 1 <= 0) {
-                        Toast.show({
-                          type: "error",
-                          text1: "提醒",
-                          text2: "不能再减少了",
-                          topOffset: 60,
-                        });
-                        return 1;
-                      }
-                      return c - 1;
-                    });
-                  }}
-                  disabled={currentVideo?.status === "done"}
-                >
-                  -
-                </Button>
                 <Input
                   style={{ flex: 1 }}
                   size="$4"
@@ -232,24 +245,7 @@ export default function App() {
                   value={current + ""}
                   disabled
                 />
-                <Button
-                  size="$4"
-                  onPress={() => {
-                    setCurrent((c) => {
-                      if (c + 1 >= currentVideo.total) {
-                        Toast.show({
-                          type: "error",
-                          text1: "提醒",
-                          text2: "不能再增加了",
-                          topOffset: 60,
-                        });
-                        return currentVideo?.total;
-                      }
-                      return c + 1;
-                    });
-                  }}
-                  disabled={currentVideo?.status === "done"}
-                >
+                <Button size="$4" onPress={addVideoProgress}>
                   +
                 </Button>
               </View>
