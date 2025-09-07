@@ -1,5 +1,6 @@
 import { getVideoList, updateVideo } from "@/apis/video";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -45,6 +46,7 @@ export default function App() {
   const currentVideo = videos.find((video) => video.id === id)!;
   const [current, setCurrent] = useState(0);
   const colorScheme = useColorScheme();
+  const textColor = useThemeColor({}, "text");
 
   // callbacks
   const handlePresentModalPress = useCallback((id: number, current: number) => {
@@ -82,28 +84,36 @@ export default function App() {
   };
 
   const addVideoProgress = async () => {
-    setCurrent((c) => {
-      if (c + 1 >= currentVideo.total) {
-        Toast.show({
-          type: "error",
-          text1: "提醒",
-          text2: "不能再增加了",
-          topOffset: 60,
-        });
-        return currentVideo?.total;
-      }
-      return c + 1;
-    });
-    await updateVideo(id, {
+    if (currentVideo.status === "done") {
+      Toast.show({
+        type: "error",
+        text1: "提醒",
+        text2: "不能再增加了",
+        topOffset: 60,
+      });
+      return;
+    }
+    setCurrent(current + 1);
+    const params = {
       ...currentVideo,
       current: current + 1,
-    });
+    };
+    let msg = "增加成功";
+    if (current + 1 === currentVideo.total) {
+      msg = "已看完";
+      params.status = "done";
+    }
+    if (currentVideo.status === "todo") {
+      msg = "已开始";
+      params.status = "doing";
+    }
+    await updateVideo(id, params);
     onRefresh();
     // toast 提示
     Toast.show({
       type: "success",
       text1: "提醒",
-      text2: "增加成功",
+      text2: msg,
       topOffset: 60,
     });
   };
@@ -143,7 +153,7 @@ export default function App() {
                       <Text
                         style={{
                           fontSize: 16,
-                          color: colorScheme === "light" ? "#222" : "#fff",
+                          color: textColor,
                         }}
                         numberOfLines={1}
                         ellipsizeMode="tail"
@@ -152,7 +162,7 @@ export default function App() {
                       </Text>
                       <Text
                         style={{
-                          color: colorScheme === "light" ? "#222" : "#fff",
+                          color: textColor,
                         }}
                       >
                         全 {item.total} 话
@@ -160,7 +170,7 @@ export default function App() {
                       {item.status === "doing" && (
                         <Text
                           style={{
-                            color: colorScheme === "light" ? "#222" : "#fff",
+                            color: textColor,
                             fontSize: 12,
                             textAlign: "right",
                           }}
@@ -171,7 +181,7 @@ export default function App() {
                       {item.status === "done" && (
                         <Text
                           style={{
-                            color: colorScheme === "light" ? "#222" : "#fff",
+                            color: textColor,
                             fontSize: 12,
                             textAlign: "right",
                           }}
@@ -182,7 +192,7 @@ export default function App() {
                       {item.status === "todo" && (
                         <Text
                           style={{
-                            color: colorScheme === "light" ? "#222" : "#fff",
+                            color: textColor,
                             fontSize: 12,
                             textAlign: "right",
                           }}
@@ -209,7 +219,7 @@ export default function App() {
                     textAlign: "center",
                     paddingVertical: 10,
                     fontSize: 16,
-                    color: "rgba(0,0,0,0.3)",
+                    color: textColor,
                   }}
                 >
                   没有更多数据...
@@ -220,11 +230,8 @@ export default function App() {
 
           <BottomSheetModal
             ref={bottomSheetModalRef}
-            snapPoints={["70%"]}
             enableDismissOnClose
             backdropComponent={renderBackdrop}
-            keyboardBehavior="fillParent"
-            enableDynamicSizing={false}
           >
             <BottomSheetView>
               <Text style={{ fontSize: 20, textAlign: "center" }}>
@@ -238,25 +245,46 @@ export default function App() {
                   flex: 1,
                 }}
               >
-                <Input
-                  style={{ flex: 1 }}
-                  size="$4"
-                  borderWidth={2}
-                  value={current + ""}
-                  disabled
-                />
-                <Button size="$4" onPress={addVideoProgress}>
-                  +
-                </Button>
+                {currentVideo?.status === "doing" && (
+                  <>
+                    <Input
+                      style={{ flex: 1 }}
+                      size="$4"
+                      borderWidth={2}
+                      value={current + ""}
+                      disabled
+                    />
+                    <Button size="$4" onPress={addVideoProgress}>
+                      +
+                    </Button>
+                  </>
+                )}
+                {currentVideo?.status === "done" && (
+                  <Button
+                    size="$4"
+                    style={{ flex: 1 }}
+                    onPress={() =>
+                      Toast.show({
+                        type: "info",
+                        text1: "提醒",
+                        text2: "功能待实现",
+                        topOffset: 60,
+                      })
+                    }
+                  >
+                    再看一遍
+                  </Button>
+                )}
+                {currentVideo?.status === "todo" && (
+                  <Button
+                    size="$4"
+                    onPress={addVideoProgress}
+                    style={{ flex: 1 }}
+                  >
+                    开始观看
+                  </Button>
+                )}
               </View>
-              <Button
-                theme="red"
-                style={{ margin: 12, marginTop: 0 }}
-                size="$4"
-                disabled={currentVideo?.status === "done"}
-              >
-                标记为已看过
-              </Button>
             </BottomSheetView>
           </BottomSheetModal>
         </BottomSheetModalProvider>
