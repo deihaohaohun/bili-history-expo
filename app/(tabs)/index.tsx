@@ -93,7 +93,6 @@ export default function App() {
       });
       return;
     }
-    setCurrent(current + 1);
     const params = {
       ...currentVideo,
       current: current + 1,
@@ -108,14 +107,29 @@ export default function App() {
       params.status = "doing";
     }
     await updateVideo(id, params);
+    setCurrent(current + 1);
     onRefresh();
-    // toast 提示
     Toast.show({
       type: "success",
       text1: "提醒",
       text2: msg,
       topOffset: 60,
     });
+  };
+
+  const startWatching = async () => {
+    await updateVideo(currentVideo.id, {
+      ...currentVideo,
+      status: currentVideo.total === 1 ? "done" : "doing",
+      current: 1,
+    });
+    Toast.show({
+      type: "info",
+      text1: "提醒",
+      text2: currentVideo.total === 1 ? "已看完" : "开始观看",
+      topOffset: 60,
+    });
+    onRefresh();
   };
 
   return (
@@ -276,11 +290,7 @@ export default function App() {
                   </Button>
                 )}
                 {currentVideo?.status === "todo" && (
-                  <Button
-                    size="$4"
-                    onPress={addVideoProgress}
-                    style={{ flex: 1 }}
-                  >
+                  <Button size="$4" onPress={startWatching} style={{ flex: 1 }}>
                     开始观看
                   </Button>
                 )}
