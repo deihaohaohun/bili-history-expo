@@ -12,7 +12,7 @@ import { defaultConfig } from "@tamagui/config/v4";
 import { TamaguiProvider, createTamagui } from "@tamagui/core";
 import { Image } from "expo-image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RefreshControl, View } from "react-native";
+import { RefreshControl, StyleSheet, View } from "react-native";
 import {
   GestureHandlerRootView,
   Pressable,
@@ -47,6 +47,7 @@ export default function App() {
   const [current, setCurrent] = useState(0);
   const colorScheme = useColorScheme();
   const textColor = useThemeColor({}, "text");
+  const [status, setStatus] = useState("doing");
 
   // callbacks
   const handlePresentModalPress = useCallback((id: number, current: number) => {
@@ -71,14 +72,14 @@ export default function App() {
   );
 
   useEffect(() => {
-    getVideoList().then((res) => {
+    getVideoList(status).then((res) => {
       setVideos(res);
     });
-  }, []);
+  }, [status]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    const res = await getVideoList();
+    const res = await getVideoList(status);
     setVideos(res);
     setRefreshing(false);
   };
@@ -123,6 +124,7 @@ export default function App() {
       status: currentVideo.total === 1 ? "done" : "doing",
       current: 1,
     });
+    setCurrent(1);
     Toast.show({
       type: "info",
       text1: "提醒",
@@ -227,6 +229,68 @@ export default function App() {
                   colors={["#000"]} // Android 刷新指示器颜色
                 />
               }
+              ListHeaderComponent={
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 12,
+                    paddingHorizontal: 8,
+                  }}
+                >
+                  <Text
+                    onPress={() => {
+                      setStatus("all");
+                    }}
+                    style={{
+                      paddingVertical: 4,
+                      fontSize: 16,
+                      color: textColor,
+                      ...(status === "all" ? style.active : {}),
+                    }}
+                  >
+                    全部
+                  </Text>
+                  <Text
+                    onPress={() => {
+                      setStatus("todo");
+                    }}
+                    style={{
+                      paddingVertical: 4,
+                      fontSize: 16,
+                      color: textColor,
+                      ...(status === "todo" ? style.active : {}),
+                    }}
+                  >
+                    未观看
+                  </Text>
+                  <Text
+                    onPress={() => {
+                      setStatus("doing");
+                    }}
+                    style={{
+                      paddingVertical: 4,
+                      fontSize: 16,
+                      color: textColor,
+                      ...(status === "doing" ? style.active : {}),
+                    }}
+                  >
+                    进行中
+                  </Text>
+                  <Text
+                    onPress={() => {
+                      setStatus("done");
+                    }}
+                    style={{
+                      paddingVertical: 4,
+                      fontSize: 16,
+                      color: textColor,
+                      ...(status === "done" ? style.active : {}),
+                    }}
+                  >
+                    已完成
+                  </Text>
+                </View>
+              }
               ListFooterComponent={
                 <Text
                   style={{
@@ -302,3 +366,11 @@ export default function App() {
     </TamaguiProvider>
   );
 }
+
+const style = StyleSheet.create({
+  active: {
+    borderBottomWidth: 4,
+    borderBottomColor: "deeppink",
+    fontWeight: "bold",
+  },
+});

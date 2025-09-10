@@ -19,6 +19,9 @@ export const deleteVideo = async (id: number) => {
 };
 
 // 获取视频列表
-export const getVideoList = async () => {
-  return get<Video[]>("/videos");
+export const getVideoList = async (status?: string) => {
+  if (status === "all") {
+    return get<Video[]>("/videos");
+  }
+  return get<Video[]>(`/videos?status=${status}`);
 };
