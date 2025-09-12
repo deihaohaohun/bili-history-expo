@@ -8,8 +8,6 @@ import {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
-import { defaultConfig } from "@tamagui/config/v4";
-import { TamaguiProvider, createTamagui } from "@tamagui/core";
 import { Image } from "expo-image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
@@ -19,15 +17,6 @@ import {
 } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { Button, Input, Text } from "tamagui";
-
-// Tamagui 配置
-const config = createTamagui(defaultConfig);
-
-type Conf = typeof config;
-
-declare module "@tamagui/core" {
-  interface TamaguiCustomConfig extends Conf {}
-}
 
 export interface Video {
   id: number;
@@ -102,6 +91,7 @@ export default function App() {
     if (current + 1 === currentVideo.total) {
       msg = "已看完";
       params.status = "done";
+      bottomSheetModalRef.current?.close();
     }
     if (currentVideo.status === "todo") {
       msg = "已开始";
@@ -135,235 +125,232 @@ export default function App() {
   };
 
   return (
-    <TamaguiProvider config={config}>
-      <GestureHandlerRootView>
-        <BottomSheetModalProvider>
-          <View style={{ flex: 1, padding: 4 }}>
-            <FlashList
-              data={videos}
-              numColumns={3} // 每行显示 3 个元素
-              estimatedItemSize={150}
-              renderItem={({ item }) => (
-                <Pressable
-                  onPress={() => {
-                    handlePresentModalPress(item.id, item.current);
-                  }}
-                >
-                  <View
-                    style={{
-                      backgroundColor:
-                        colorScheme === "light" ? "#fff" : "#222",
-                      margin: 4,
-                      borderRadius: 8,
-                      overflow: "hidden",
-                    }}
-                  >
-                    <Image
-                      source={item.image}
-                      style={{
-                        width: "100%",
-                        aspectRatio: 3 / 4,
-                      }}
-                    />
-                    <View style={{ padding: 4 }}>
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          color: textColor,
-                        }}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        {item.title}
-                      </Text>
-                      <Text
-                        style={{
-                          color: textColor,
-                        }}
-                      >
-                        全 {item.total} 话
-                      </Text>
-                      {item.status === "doing" && (
-                        <Text
-                          style={{
-                            color: textColor,
-                            fontSize: 12,
-                            textAlign: "right",
-                          }}
-                        >
-                          当前看到 {item.current} 话
-                        </Text>
-                      )}
-                      {item.status === "done" && (
-                        <Text
-                          style={{
-                            color: textColor,
-                            fontSize: 12,
-                            textAlign: "right",
-                          }}
-                        >
-                          已看完
-                        </Text>
-                      )}
-                      {item.status === "todo" && (
-                        <Text
-                          style={{
-                            color: textColor,
-                            fontSize: 12,
-                            textAlign: "right",
-                          }}
-                        >
-                          未观看
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                </Pressable>
-              )}
-              keyExtractor={(item) => item.id + ""}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  tintColor="#000" // iOS 刷新指示器颜色
-                  colors={["#000"]} // Android 刷新指示器颜色
-                />
-              }
-              ListHeaderComponent={
+    <GestureHandlerRootView>
+      <BottomSheetModalProvider>
+        <View style={{ flex: 1, padding: 4 }}>
+          <FlashList
+            data={videos}
+            numColumns={3} // 每行显示 3 个元素
+            estimatedItemSize={150}
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={() => {
+                  handlePresentModalPress(item.id, item.current);
+                }}
+              >
                 <View
                   style={{
-                    flexDirection: "row",
-                    gap: 12,
-                    paddingHorizontal: 8,
+                    backgroundColor: colorScheme === "light" ? "#fff" : "#222",
+                    margin: 4,
+                    borderRadius: 8,
+                    overflow: "hidden",
                   }}
                 >
-                  <Text
-                    onPress={() => {
-                      setStatus("all");
-                    }}
+                  <Image
+                    source={item.image}
                     style={{
-                      paddingVertical: 4,
-                      fontSize: 16,
-                      color: textColor,
-                      ...(status === "all" ? style.active : {}),
+                      width: "100%",
+                      aspectRatio: 3 / 4,
                     }}
-                  >
-                    全部
-                  </Text>
-                  <Text
-                    onPress={() => {
-                      setStatus("todo");
-                    }}
-                    style={{
-                      paddingVertical: 4,
-                      fontSize: 16,
-                      color: textColor,
-                      ...(status === "todo" ? style.active : {}),
-                    }}
-                  >
-                    未观看
-                  </Text>
-                  <Text
-                    onPress={() => {
-                      setStatus("doing");
-                    }}
-                    style={{
-                      paddingVertical: 4,
-                      fontSize: 16,
-                      color: textColor,
-                      ...(status === "doing" ? style.active : {}),
-                    }}
-                  >
-                    进行中
-                  </Text>
-                  <Text
-                    onPress={() => {
-                      setStatus("done");
-                    }}
-                    style={{
-                      paddingVertical: 4,
-                      fontSize: 16,
-                      color: textColor,
-                      ...(status === "done" ? style.active : {}),
-                    }}
-                  >
-                    已完成
-                  </Text>
+                  />
+                  <View style={{ padding: 4 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: textColor,
+                      }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {item.title}
+                    </Text>
+                    <Text
+                      style={{
+                        color: textColor,
+                      }}
+                    >
+                      全 {item.total} 话
+                    </Text>
+                    {item.status === "doing" && (
+                      <Text
+                        style={{
+                          color: textColor,
+                          fontSize: 12,
+                          textAlign: "right",
+                        }}
+                      >
+                        当前看到 {item.current} 话
+                      </Text>
+                    )}
+                    {item.status === "done" && (
+                      <Text
+                        style={{
+                          color: textColor,
+                          fontSize: 12,
+                          textAlign: "right",
+                        }}
+                      >
+                        已看完
+                      </Text>
+                    )}
+                    {item.status === "todo" && (
+                      <Text
+                        style={{
+                          color: textColor,
+                          fontSize: 12,
+                          textAlign: "right",
+                        }}
+                      >
+                        未观看
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              }
-              ListFooterComponent={
-                <Text
-                  style={{
-                    textAlign: "center",
-                    paddingVertical: 10,
-                    fontSize: 16,
-                    color: textColor,
-                  }}
-                >
-                  没有更多数据...
-                </Text>
-              }
-            />
-          </View>
-
-          <BottomSheetModal
-            ref={bottomSheetModalRef}
-            enableDismissOnClose
-            backdropComponent={renderBackdrop}
-          >
-            <BottomSheetView>
-              <Text style={{ fontSize: 20, textAlign: "center" }}>
-                {currentVideo?.title}
-              </Text>
+              </Pressable>
+            )}
+            keyExtractor={(item) => item.id + ""}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#000" // iOS 刷新指示器颜色
+                colors={["#000"]} // Android 刷新指示器颜色
+              />
+            }
+            ListHeaderComponent={
               <View
                 style={{
                   flexDirection: "row",
                   gap: 12,
-                  padding: 12,
-                  flex: 1,
+                  paddingHorizontal: 8,
                 }}
               >
-                {currentVideo?.status === "doing" && (
-                  <>
-                    <Input
-                      style={{ flex: 1 }}
-                      size="$4"
-                      borderWidth={2}
-                      value={current + ""}
-                      disabled
-                    />
-                    <Button size="$4" onPress={addVideoProgress}>
-                      +
-                    </Button>
-                  </>
-                )}
-                {currentVideo?.status === "done" && (
-                  <Button
-                    size="$4"
-                    style={{ flex: 1 }}
-                    onPress={() =>
-                      Toast.show({
-                        type: "info",
-                        text1: "提醒",
-                        text2: "功能待实现",
-                        topOffset: 60,
-                      })
-                    }
-                  >
-                    再看一遍
-                  </Button>
-                )}
-                {currentVideo?.status === "todo" && (
-                  <Button size="$4" onPress={startWatching} style={{ flex: 1 }}>
-                    开始观看
-                  </Button>
-                )}
+                <Text
+                  onPress={() => {
+                    setStatus("all");
+                  }}
+                  style={{
+                    paddingVertical: 4,
+                    fontSize: 16,
+                    color: textColor,
+                    ...(status === "all" ? style.active : {}),
+                  }}
+                >
+                  全部
+                </Text>
+                <Text
+                  onPress={() => {
+                    setStatus("todo");
+                  }}
+                  style={{
+                    paddingVertical: 4,
+                    fontSize: 16,
+                    color: textColor,
+                    ...(status === "todo" ? style.active : {}),
+                  }}
+                >
+                  未观看
+                </Text>
+                <Text
+                  onPress={() => {
+                    setStatus("doing");
+                  }}
+                  style={{
+                    paddingVertical: 4,
+                    fontSize: 16,
+                    color: textColor,
+                    ...(status === "doing" ? style.active : {}),
+                  }}
+                >
+                  进行中
+                </Text>
+                <Text
+                  onPress={() => {
+                    setStatus("done");
+                  }}
+                  style={{
+                    paddingVertical: 4,
+                    fontSize: 16,
+                    color: textColor,
+                    ...(status === "done" ? style.active : {}),
+                  }}
+                >
+                  已完成
+                </Text>
               </View>
-            </BottomSheetView>
-          </BottomSheetModal>
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>
-    </TamaguiProvider>
+            }
+            ListFooterComponent={
+              <Text
+                style={{
+                  textAlign: "center",
+                  paddingVertical: 10,
+                  fontSize: 16,
+                  color: textColor,
+                }}
+              >
+                没有更多数据...
+              </Text>
+            }
+          />
+        </View>
+
+        <BottomSheetModal
+          ref={bottomSheetModalRef}
+          enableDismissOnClose
+          backdropComponent={renderBackdrop}
+        >
+          <BottomSheetView>
+            <Text style={{ fontSize: 20, textAlign: "center" }}>
+              {currentVideo?.title}
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 12,
+                padding: 12,
+                flex: 1,
+              }}
+            >
+              {currentVideo?.status === "doing" && (
+                <>
+                  <Input
+                    style={{ flex: 1 }}
+                    size="$4"
+                    borderWidth={2}
+                    value={current + ""}
+                    disabled
+                  />
+                  <Button size="$4" onPress={addVideoProgress}>
+                    +
+                  </Button>
+                </>
+              )}
+              {currentVideo?.status === "done" && (
+                <Button
+                  size="$4"
+                  style={{ flex: 1 }}
+                  onPress={() =>
+                    Toast.show({
+                      type: "info",
+                      text1: "提醒",
+                      text2: "功能待实现",
+                      topOffset: 60,
+                    })
+                  }
+                >
+                  再看一遍
+                </Button>
+              )}
+              {currentVideo?.status === "todo" && (
+                <Button size="$4" onPress={startWatching} style={{ flex: 1 }}>
+                  开始观看
+                </Button>
+              )}
+            </View>
+          </BottomSheetView>
+        </BottomSheetModal>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }
 
