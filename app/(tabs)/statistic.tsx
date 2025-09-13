@@ -55,13 +55,18 @@ export default function StatisticScreen() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          width: 120,
+          width: 160,
           marginRight: 20,
         }}
       >
         {renderDot(data)}
         <Text style={{ color: "white" }}>
-          {data.title}: {data.value}%
+          {data.title} ({data.value}):{" "}
+          {(
+            (data.value / pieData.reduce((pre, next) => pre + next.value, 0)) *
+            100
+          ).toFixed(2)}
+          %
         </Text>
       </View>
     );
@@ -97,14 +102,14 @@ export default function StatisticScreen() {
     >
       <View
         style={{
-          margin: 20,
-          padding: 16,
-          borderRadius: 20,
-          backgroundColor: "#222",
+          margin: 12,
+          padding: 12,
+          borderRadius: 12,
+          backgroundColor: "#333",
         }}
       >
-        <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>
-          分类统计
+        <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
+          视频类型统计
         </Text>
         <View style={{ padding: 20, alignItems: "center" }}>
           <PieChart
@@ -114,9 +119,8 @@ export default function StatisticScreen() {
             sectionAutoFocus
             radius={90}
             innerRadius={60}
-            innerCircleColor={"#222"}
+            innerCircleColor={"#333"}
             onPress={(data: any, idx: number) => {
-              console.log(data, idx);
               // 把对应索引的数据的 focused 属性设置为 true, 其他的设置为 false
               pieData.forEach((item, index) => {
                 item.focused = index === idx;

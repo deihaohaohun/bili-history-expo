@@ -8,6 +8,7 @@ import {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
+import dayjs from "dayjs";
 import { Image } from "expo-image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
@@ -25,6 +26,7 @@ export interface Video {
   total: number;
   status: string;
   current: number;
+  finishedAt?: number;
 }
 
 export default function App() {
@@ -91,6 +93,7 @@ export default function App() {
     if (current + 1 === currentVideo.total) {
       msg = "已看完";
       params.status = "done";
+      params.finishedAt = dayjs().valueOf();
       bottomSheetModalRef.current?.close();
     }
     if (currentVideo.status === "todo") {

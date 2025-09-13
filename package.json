@@ -23,6 +23,7 @@
     "@tamagui/core": "^1.132.22",
     "@tamagui/input": "^1.132.23",
     "axios": "^1.11.0",
+    "dayjs": "^1.11.18",
     "expo": "~53.0.22",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.7",

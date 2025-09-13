@@ -23,5 +23,5 @@ export const getVideoList = async (status?: string) => {
   if (status === "all") {
     return get<Video[]>("/videos");
   }
-  return get<Video[]>(`/videos?status=${status}`);
+  return get<Video[]>(`/videos?status=${status}&_sort=finishedAt&_order=desc`);
 };
