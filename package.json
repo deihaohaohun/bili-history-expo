@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "dev:server": "cd .. && json-server --host 0.0.0.0 --port 3000 --watch db.json",
+    "predev": "node scripts/update-env.mjs",
     "dev": "start-server-and-test \"npm run dev:server\" http://localhost:3000 \"npm run start\""
   },
   "dependencies": {

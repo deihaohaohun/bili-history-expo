@@ -89,15 +89,15 @@ export default function App() {
       ...currentVideo,
       current: current + 1,
     };
-    let msg = "增加成功";
+    let msg = "进度 +1 ~";
     if (current + 1 === currentVideo.total) {
-      msg = "已看完";
+      msg = "成就 +1 ~";
       params.status = "done";
       params.finishedAt = dayjs().valueOf();
       bottomSheetModalRef.current?.close();
     }
     if (currentVideo.status === "todo") {
-      msg = "已开始";
+      msg = "开始达成成就吧~";
       params.status = "doing";
     }
     await updateVideo(id, params);
