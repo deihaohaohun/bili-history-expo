@@ -27,6 +27,7 @@ export interface Video {
   status: string;
   current: number;
   finishedAt?: number;
+  type: "Anime" | "Movie" | "Documentary";
 }
 
 export default function App() {
@@ -76,26 +77,11 @@ export default function App() {
   };
 
   const addVideoProgress = async () => {
-    if (currentVideo.status === "done") {
-      Toast.show({
-        type: "error",
-        text1: "提醒",
-        text2: "不能再增加了",
-        topOffset: 60,
-      });
-      return;
-    }
     const params = {
       ...currentVideo,
       current: current + 1,
     };
-    let msg = "进度 +1 ~";
-    if (current + 1 === currentVideo.total) {
-      msg = "成就 +1 ~";
-      params.status = "done";
-      params.finishedAt = dayjs().valueOf();
-      bottomSheetModalRef.current?.close();
-    }
+    let msg = `已经成功标记进度到第 ${current + 1} 集了 ~`;
     if (currentVideo.status === "todo") {
       msg = "开始达成成就吧~";
       params.status = "doing";
@@ -127,13 +113,28 @@ export default function App() {
     onRefresh();
   };
 
+  const markFinished = async () => {
+    await updateVideo(currentVideo.id, {
+      ...currentVideo,
+      status: "done",
+      finishedAt: dayjs().valueOf(),
+    });
+    Toast.show({
+      type: "success",
+      text1: "提醒",
+      text2: "成就 +1, 快去解锁更多成就吧~",
+      topOffset: 60,
+    });
+    onRefresh();
+  };
+
   return (
     <GestureHandlerRootView>
       <BottomSheetModalProvider>
         <View style={{ flex: 1, padding: 4 }}>
           <FlashList
             data={videos}
-            numColumns={3} // 每行显示 3 个元素
+            numColumns={3}
             estimatedItemSize={150}
             renderItem={({ item }) => (
               <Pressable
@@ -314,20 +315,25 @@ export default function App() {
                 flex: 1,
               }}
             >
-              {currentVideo?.status === "doing" && (
-                <>
-                  <Input
-                    style={{ flex: 1 }}
-                    size="$4"
-                    borderWidth={2}
-                    value={current + ""}
-                    disabled
-                  />
-                  <Button size="$4" onPress={addVideoProgress}>
-                    +
+              {currentVideo?.status === "doing" &&
+                (currentVideo.current < currentVideo.total ? (
+                  <>
+                    <Input
+                      style={{ flex: 1 }}
+                      size="$4"
+                      borderWidth={2}
+                      value={current + ""}
+                      disabled
+                    />
+                    <Button size="$4" onPress={addVideoProgress}>
+                      +
+                    </Button>
+                  </>
+                ) : (
+                  <Button onPress={markFinished} style={{ flex: 1 }}>
+                    标记为已看过
                   </Button>
-                </>
-              )}
+                ))}
               {currentVideo?.status === "done" && (
                 <Button
                   size="$4"
@@ -345,8 +351,16 @@ export default function App() {
                 </Button>
               )}
               {currentVideo?.status === "todo" && (
-                <Button size="$4" onPress={startWatching} style={{ flex: 1 }}>
-                  开始观看
+                <Button
+                  size="$4"
+                  onPress={() =>
+                    currentVideo.type === "Anime"
+                      ? startWatching()
+                      : markFinished()
+                  }
+                  style={{ flex: 1 }}
+                >
+                  {currentVideo.type === "Anime" ? "开始观看" : "标记为看过"}
                 </Button>
               )}
             </View>
