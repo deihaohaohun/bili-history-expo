@@ -100,14 +100,14 @@ export default function App() {
   const startWatching = async () => {
     await updateVideo(currentVideo.id, {
       ...currentVideo,
-      status: currentVideo.total === 1 ? "done" : "doing",
+      status: "doing",
       current: 1,
     });
     setCurrent(1);
     Toast.show({
       type: "info",
       text1: "提醒",
-      text2: currentVideo.total === 1 ? "已看完" : "开始观看",
+      text2: "开始观看",
       topOffset: 60,
     });
     onRefresh();
@@ -126,6 +126,23 @@ export default function App() {
       topOffset: 60,
     });
     onRefresh();
+    bottomSheetModalRef.current?.close();
+  };
+  const markMovieFinished = async () => {
+    await updateVideo(currentVideo.id, {
+      ...currentVideo,
+      status: "done",
+      current: 1,
+      finishedAt: dayjs().valueOf(),
+    });
+    Toast.show({
+      type: "success",
+      text1: "提醒",
+      text2: "成就 +1, 快去解锁更多成就吧~",
+      topOffset: 60,
+    });
+    onRefresh();
+    bottomSheetModalRef.current?.close();
   };
 
   return (
@@ -356,7 +373,7 @@ export default function App() {
                   onPress={() =>
                     currentVideo.type === "Anime"
                       ? startWatching()
-                      : markFinished()
+                      : markMovieFinished()
                   }
                   style={{ flex: 1 }}
                 >
