@@ -107,10 +107,11 @@ export default function App() {
     Toast.show({
       type: "info",
       text1: "提醒",
-      text2: "开始观看",
+      text2: "已标记开始观看,快去追番吧~",
       topOffset: 60,
     });
     onRefresh();
+    bottomSheetModalRef.current?.close();
   };
 
   const markFinished = async () => {
@@ -190,7 +191,7 @@ export default function App() {
                         color: textColor,
                       }}
                     >
-                      全 {item.total} 话
+                      全 {item.total} {item.type === "Anime" ? "话" : "集"}
                     </Text>
                     {item.status === "doing" && (
                       <Text
@@ -328,24 +329,40 @@ export default function App() {
               style={{
                 flexDirection: "row",
                 gap: 12,
-                padding: 12,
+                paddingVertical: 12,
+                paddingBottom: 12,
+                paddingHorizontal: 12,
                 flex: 1,
               }}
             >
               {currentVideo?.status === "doing" &&
                 (currentVideo.current < currentVideo.total ? (
-                  <>
-                    <Input
-                      style={{ flex: 1 }}
-                      size="$4"
-                      borderWidth={2}
-                      value={current + ""}
-                      disabled
-                    />
+                  <View style={{ width: "100%", gap: 12 }}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        width: "100%",
+                        gap: 8,
+                      }}
+                    >
+                      <Text fontSize={16}>当前看到第</Text>
+                      <Input
+                        style={{ flex: 1 }}
+                        size="$4"
+                        borderWidth={2}
+                        value={current + ""}
+                        disabled
+                      />
+                      <Text>{currentVideo.type === "Anime" ? "话" : "集"}</Text>
+                    </View>
                     <Button size="$4" onPress={addVideoProgress}>
-                      +
+                      <Text>
+                        标记本{currentVideo.type === "Anime" ? "话" : "集"}
+                        为已看过
+                      </Text>
                     </Button>
-                  </>
+                  </View>
                 ) : (
                   <Button onPress={markFinished} style={{ flex: 1 }}>
                     标记为已看过
