@@ -26,8 +26,9 @@ export interface Video {
   total: number;
   status: string;
   current: number;
-  finishedAt?: number;
+  finishedAt?: string;
   type: "Anime" | "Movie" | "Documentary";
+  loopCount?: number;
 }
 
 export default function App() {
@@ -65,7 +66,7 @@ export default function App() {
 
   useEffect(() => {
     getVideoList(status).then((res) => {
-      setVideos(res);
+      setVideos(res || []);
     });
   }, [status]);
 
@@ -118,7 +119,7 @@ export default function App() {
     await updateVideo(currentVideo.id, {
       ...currentVideo,
       status: "done",
-      finishedAt: dayjs().valueOf(),
+      finishedAt: dayjs().valueOf() + '',
     });
     Toast.show({
       type: "success",
@@ -134,7 +135,7 @@ export default function App() {
       ...currentVideo,
       status: "done",
       current: 1,
-      finishedAt: dayjs().valueOf(),
+      finishedAt: dayjs().valueOf() + '',
     });
     Toast.show({
       type: "success",
@@ -153,7 +154,6 @@ export default function App() {
           <FlashList
             data={videos}
             numColumns={3}
-            estimatedItemSize={150}
             renderItem={({ item }) => (
               <Pressable
                 onPress={() => {
