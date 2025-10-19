@@ -1,5 +1,6 @@
 import { getVideoList, updateVideo } from "@/apis/video";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import ListHeader from "@/components/ListHeader";
+import VideoComponent from "@/components/VideoComponent";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import {
   BottomSheetBackdrop,
@@ -9,12 +10,10 @@ import {
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import dayjs from "dayjs";
-import { Image } from "expo-image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RefreshControl, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import {
   GestureHandlerRootView,
-  Pressable,
 } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { Button, Input, Text } from "tamagui";
@@ -38,7 +37,6 @@ export default function App() {
   const [id, setId] = useState(0);
   const currentVideo = videos.find((video) => video.id === id)!;
   const [current, setCurrent] = useState(0);
-  const colorScheme = useColorScheme();
   const textColor = useThemeColor({}, "text");
   const [status, setStatus] = useState("doing");
 
@@ -160,74 +158,7 @@ export default function App() {
                   handlePresentModalPress(item.id, item.current);
                 }}
               >
-                <View
-                  style={{
-                    backgroundColor: colorScheme === "light" ? "#fff" : "#222",
-                    margin: 4,
-                    borderRadius: 8,
-                    overflow: "hidden",
-                  }}
-                >
-                  <Image
-                    source={item.image}
-                    style={{
-                      width: "100%",
-                      aspectRatio: 3 / 4,
-                    }}
-                  />
-                  <View style={{ padding: 4 }}>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        color: textColor,
-                      }}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {item.title}
-                    </Text>
-                    <Text
-                      style={{
-                        color: textColor,
-                      }}
-                    >
-                      全 {item.total} {item.type === "Anime" ? "话" : "集"}
-                    </Text>
-                    {item.status === "doing" && (
-                      <Text
-                        style={{
-                          color: textColor,
-                          fontSize: 12,
-                          textAlign: "right",
-                        }}
-                      >
-                        当前看到 {item.current} 话
-                      </Text>
-                    )}
-                    {item.status === "done" && (
-                      <Text
-                        style={{
-                          color: textColor,
-                          fontSize: 12,
-                          textAlign: "right",
-                        }}
-                      >
-                        已看完
-                      </Text>
-                    )}
-                    {item.status === "todo" && (
-                      <Text
-                        style={{
-                          color: textColor,
-                          fontSize: 12,
-                          textAlign: "right",
-                        }}
-                      >
-                        未观看
-                      </Text>
-                    )}
-                  </View>
-                </View>
+                <VideoComponent item={item} />
               </Pressable>
             )}
             keyExtractor={(item) => item.id + ""}
@@ -240,66 +171,7 @@ export default function App() {
               />
             }
             ListHeaderComponent={
-              <View
-                style={{
-                  flexDirection: "row",
-                  gap: 12,
-                  paddingHorizontal: 8,
-                }}
-              >
-                <Text
-                  onPress={() => {
-                    setStatus("all");
-                  }}
-                  style={{
-                    paddingVertical: 4,
-                    fontSize: 16,
-                    color: textColor,
-                    ...(status === "all" ? style.active : {}),
-                  }}
-                >
-                  全部
-                </Text>
-                <Text
-                  onPress={() => {
-                    setStatus("todo");
-                  }}
-                  style={{
-                    paddingVertical: 4,
-                    fontSize: 16,
-                    color: textColor,
-                    ...(status === "todo" ? style.active : {}),
-                  }}
-                >
-                  未观看
-                </Text>
-                <Text
-                  onPress={() => {
-                    setStatus("doing");
-                  }}
-                  style={{
-                    paddingVertical: 4,
-                    fontSize: 16,
-                    color: textColor,
-                    ...(status === "doing" ? style.active : {}),
-                  }}
-                >
-                  进行中
-                </Text>
-                <Text
-                  onPress={() => {
-                    setStatus("done");
-                  }}
-                  style={{
-                    paddingVertical: 4,
-                    fontSize: 16,
-                    color: textColor,
-                    ...(status === "done" ? style.active : {}),
-                  }}
-                >
-                  已完成
-                </Text>
-              </View>
+              <ListHeader setStatus={setStatus} status={status} />
             }
             ListFooterComponent={
               <Text

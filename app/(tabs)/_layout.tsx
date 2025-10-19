@@ -17,7 +17,7 @@ const config = createTamagui(defaultConfig);
 type Conf = typeof config;
 
 declare module "@tamagui/core" {
-  interface TamaguiCustomConfig extends Conf {}
+  interface TamaguiCustomConfig extends Conf { }
 }
 
 export default function TabLayout() {
@@ -53,7 +53,7 @@ export default function TabLayout() {
           options={{
             title: "统计",
             tabBarIcon: ({ color }) => (
-              <AntDesign name="areachart" size={24} color={color} />
+              <AntDesign name="area-chart" size={24} color={color} />
             ),
           }}
         />
