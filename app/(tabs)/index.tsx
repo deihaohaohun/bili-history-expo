@@ -1,7 +1,8 @@
-import { getVideoList, updateVideo } from "@/apis/video";
+import { getVideoList } from "@/apis/video";
 import ListHeader from "@/components/ListHeader";
 import VideoComponent from "@/components/VideoComponent";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { supabase } from "@/lib/supabase";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -77,31 +78,36 @@ export default function App() {
 
   const addVideoProgress = async () => {
     const params = {
-      ...currentVideo,
       current: current + 1,
     };
     let msg = `已经成功标记进度到第 ${current + 1} 集了 ~`;
-    if (currentVideo.status === "todo") {
-      msg = "开始达成成就吧~";
-      params.status = "doing";
+    const { data, error } = await supabase
+      .from("videos")
+      .update(params)
+      .eq("id", currentVideo.id);
+
+    if (error) {
+      console.log("Update failed:", error);
+    } else {
+      setCurrent(current + 1);
+      onRefresh();
+      Toast.show({
+        type: "success",
+        text1: "提醒",
+        text2: msg,
+        topOffset: 60,
+      });
     }
-    await updateVideo(id, params);
-    setCurrent(current + 1);
-    onRefresh();
-    Toast.show({
-      type: "success",
-      text1: "提醒",
-      text2: msg,
-      topOffset: 60,
-    });
   };
 
   const startWatching = async () => {
-    await updateVideo(currentVideo.id, {
-      ...currentVideo,
-      status: "doing",
-      current: 1,
-    });
+    await supabase
+      .from("videos")
+      .update({
+        status: "doing",
+        current: 1,
+      })
+      .eq("id", currentVideo.id);
     setCurrent(1);
     Toast.show({
       type: "info",
@@ -114,11 +120,13 @@ export default function App() {
   };
 
   const markFinished = async () => {
-    await updateVideo(currentVideo.id, {
-      ...currentVideo,
-      status: "done",
-      finishedAt: dayjs().valueOf() + '',
-    });
+    await supabase
+      .from("videos")
+      .update({
+        status: "done",
+        finishedAt: dayjs().valueOf() + '',
+      })
+      .eq("id", currentVideo.id);
     Toast.show({
       type: "success",
       text1: "提醒",
@@ -129,12 +137,14 @@ export default function App() {
     bottomSheetModalRef.current?.close();
   };
   const markMovieFinished = async () => {
-    await updateVideo(currentVideo.id, {
-      ...currentVideo,
-      status: "done",
-      current: 1,
-      finishedAt: dayjs().valueOf() + '',
-    });
+    await supabase
+      .from("videos")
+      .update({
+        status: "done",
+        current: 1,
+        finishedAt: dayjs().valueOf() + '',
+      })
+      .eq("id", currentVideo.id);
     Toast.show({
       type: "success",
       text1: "提醒",
