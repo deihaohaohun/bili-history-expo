@@ -97,7 +97,6 @@ export default function StatisticScreen() {
     <View
       style={{
         flex: 1,
-        backgroundColor: "#eee",
       }}
     >
       <View

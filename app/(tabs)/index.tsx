@@ -12,7 +12,7 @@ import {
 import { FlashList } from "@shopify/flash-list";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, View } from "react-native";
 import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
@@ -40,6 +40,7 @@ export default function App() {
   const [current, setCurrent] = useState(0);
   const textColor = useThemeColor({}, "text");
   const [status, setStatus] = useState("doing");
+  const [loading, setLoading] = useState(true);
 
   // callbacks
   const handlePresentModalPress = useCallback((id: number, current: number) => {
@@ -66,13 +67,16 @@ export default function App() {
   useEffect(() => {
     getVideoList(status).then((res) => {
       setVideos(res || []);
+      setLoading(false);
     });
   }, [status]);
 
   const onRefresh = async () => {
+    setLoading(true);
     setRefreshing(true);
     const res = await getVideoList(status);
-    setVideos(res);
+    setLoading(false);
+    setVideos(res || []);
     setRefreshing(false);
   };
 
@@ -81,7 +85,7 @@ export default function App() {
       current: current + 1,
     };
     let msg = `已经成功标记进度到第 ${current + 1} 集了 ~`;
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("videos")
       .update(params)
       .eq("id", currentVideo.id);
@@ -124,7 +128,9 @@ export default function App() {
       .from("videos")
       .update({
         status: "done",
-        finishedAt: dayjs().valueOf() + '',
+        finished_at: dayjs().valueOf() + '',
+        // TODO: 增加再次观看功能的时候需要循环次数增加逻辑
+        loop_count: 1
       })
       .eq("id", currentVideo.id);
     Toast.show({
@@ -142,7 +148,7 @@ export default function App() {
       .update({
         status: "done",
         current: 1,
-        finishedAt: dayjs().valueOf() + '',
+        finished_at: dayjs().valueOf() + '',
       })
       .eq("id", currentVideo.id);
     Toast.show({
@@ -192,7 +198,7 @@ export default function App() {
                   color: textColor,
                 }}
               >
-                没有更多数据...
+                {loading ? "正在加载中..." : '已加载所有数据'}
               </Text>
             }
           />
@@ -286,11 +292,3 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
-
-const style = StyleSheet.create({
-  active: {
-    borderBottomWidth: 4,
-    borderBottomColor: "deeppink",
-    fontWeight: "bold",
-  },
-});
