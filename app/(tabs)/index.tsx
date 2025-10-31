@@ -3,6 +3,7 @@ import ListHeader from "@/components/ListHeader";
 import VideoComponent from "@/components/VideoComponent";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { supabase } from "@/lib/supabase";
+import Entypo from '@expo/vector-icons/Entypo';
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -11,6 +12,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import dayjs from "dayjs";
+import { Stack, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, RefreshControl, View } from "react-native";
 import {
@@ -41,6 +43,7 @@ export default function App() {
   const textColor = useThemeColor({}, "text");
   const [status, setStatus] = useState("doing");
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   // callbacks
   const handlePresentModalPress = useCallback((id: number, current: number) => {
@@ -164,6 +167,11 @@ export default function App() {
   return (
     <GestureHandlerRootView>
       <BottomSheetModalProvider>
+
+        <Stack.Screen options={{
+          headerRight: () => <Entypo style={{ marginRight: 12 }} name="squared-plus" size={24} color="black" onPress={() => { router.navigate('/addVideoModal') }} />
+        }} />
+
         <View style={{ flex: 1, padding: 4 }}>
           <FlashList
             data={videos}
