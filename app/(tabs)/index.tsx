@@ -1,5 +1,4 @@
 import { getVideoList } from "@/apis/video";
-import ListHeader from "@/components/ListHeader";
 import VideoComponent from "@/components/VideoComponent";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { supabase } from "@/lib/supabase";
@@ -14,26 +13,24 @@ import { FlashList } from "@shopify/flash-list";
 import dayjs from "dayjs";
 import { Stack, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, RefreshControl, View } from "react-native";
+import { Pressable, RefreshControl, useWindowDimensions, View } from "react-native";
 import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { Button, Input, Text } from "tamagui";
 
-export interface Video {
-  id: number;
-  title: string;
-  image: string;
-  total: number;
-  status: string;
-  current: number;
-  finishedAt?: string;
-  type: "Anime" | "Movie" | "Documentary";
-  loopCount?: number;
-}
+import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 
-export default function App() {
+const renderTabBar = (props: any) => (
+  <TabBar
+    {...props}
+    indicatorStyle={{ backgroundColor: 'white' }}
+    style={{ backgroundColor: '#509EE2' }}
+  />
+);
+
+const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -41,9 +38,8 @@ export default function App() {
   const currentVideo = videos.find((video) => video.id === id)!;
   const [current, setCurrent] = useState(0);
   const textColor = useThemeColor({}, "text");
-  const [status, setStatus] = useState("doing");
+  const [status] = useState(queryStatus);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   // callbacks
   const handlePresentModalPress = useCallback((id: number, current: number) => {
@@ -167,11 +163,6 @@ export default function App() {
   return (
     <GestureHandlerRootView>
       <BottomSheetModalProvider>
-
-        <Stack.Screen options={{
-          headerRight: () => <Entypo style={{ marginRight: 12 }} name="squared-plus" size={24} color="black" onPress={() => { router.navigate('/addVideoModal') }} />
-        }} />
-
         <View style={{ flex: 1, padding: 4 }}>
           <FlashList
             data={videos}
@@ -193,9 +184,6 @@ export default function App() {
                 tintColor="#000" // iOS 刷新指示器颜色
                 colors={["#000"]} // Android 刷新指示器颜色
               />
-            }
-            ListHeaderComponent={
-              <ListHeader setStatus={setStatus} status={status} />
             }
             ListFooterComponent={
               <Text
@@ -298,5 +286,52 @@ export default function App() {
         </BottomSheetModal>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
+  )
+}
+
+const renderScene = SceneMap({
+  doing: () => <VideoList />,
+  todo: () => <VideoList queryStatus="todo" />,
+  done: () => <VideoList queryStatus="done" />,
+});
+
+const routes = [
+  { key: 'doing', title: '正在看' },
+  { key: 'todo', title: '未观看' },
+  { key: 'done', title: '已完成' },
+];
+
+export interface Video {
+  id: number;
+  title: string;
+  image: string;
+  total: number;
+  status: string;
+  current: number;
+  finishedAt?: string;
+  type: "Anime" | "Movie" | "Documentary";
+  loopCount?: number;
+}
+
+export default function App() {
+  const router = useRouter();
+
+  const layout = useWindowDimensions();
+  const [index, setIndex] = useState(0);
+
+  return (<>
+    <Stack.Screen options={{
+      headerRight: () => <Entypo style={{ marginRight: 12 }} name="squared-plus" size={24} color="black" onPress={() => { router.navigate('/addVideoModal') }} />
+    }} />
+
+    <TabView
+      renderTabBar={renderTabBar}
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={{ width: layout.width }}
+    />
+  </>
+
   );
 }
