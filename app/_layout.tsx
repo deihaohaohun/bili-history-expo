@@ -9,7 +9,18 @@ import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { defaultConfig } from "@tamagui/config/v4";
 import Toast from "react-native-toast-message";
+import { createTamagui, TamaguiProvider } from "tamagui";
+
+// Tamagui 配置
+const config = createTamagui(defaultConfig);
+
+type Conf = typeof config;
+
+declare module "@tamagui/core" {
+  interface TamaguiCustomConfig extends Conf { }
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -23,14 +34,16 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="addVideoModal" options={{ title: '添加视频', presentation: 'modal' }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-      <Toast />
-    </ThemeProvider>
+    <TamaguiProvider config={config}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="addVideoModal" options={{ title: '添加待观看视频', presentation: 'modal' }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+        <Toast />
+      </ThemeProvider>
+    </TamaguiProvider>
   );
 }

@@ -40,6 +40,7 @@ const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
   const textColor = useThemeColor({}, "text");
   const [status] = useState(queryStatus);
   const [loading, setLoading] = useState(true);
+  const [processLoading, setProcessLoading] = useState(false);
 
   // callbacks
   const handlePresentModalPress = useCallback((id: number, current: number) => {
@@ -80,6 +81,7 @@ const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
   };
 
   const addVideoProgress = async () => {
+    setProcessLoading(true);
     const params = {
       current: current + 1,
     };
@@ -88,7 +90,7 @@ const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
       .from("videos")
       .update(params)
       .eq("id", currentVideo.id);
-
+    setProcessLoading(false);
     if (error) {
       console.log("Update failed:", error);
     } else {
@@ -240,10 +242,9 @@ const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
                       />
                       <Text>{currentVideo.type === "Anime" ? "话" : "集"}</Text>
                     </View>
-                    <Button size="$4" onPress={addVideoProgress}>
+                    <Button size="$4" onPress={addVideoProgress} disabled={processLoading}>
                       <Text>
-                        标记本{currentVideo.type === "Anime" ? "话" : "集"}
-                        为已看过
+                        标记本{currentVideo.type === "Anime" ? "话" : "集"}为已看过
                       </Text>
                     </Button>
                   </View>
