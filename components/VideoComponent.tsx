@@ -17,13 +17,19 @@ const VideoComponent = ({ item }: { item: VideoType }) => {
         overflow: "hidden",
       }}
     >
-      <Image
-        source={item.image}
-        style={{
-          width: "100%",
-          aspectRatio: 3 / 4,
-        }}
-      />
+      {item.image ? (
+        <Image
+          source={item.image}
+          style={{
+            width: "100%",
+            aspectRatio: 3 / 4,
+          }}
+        />
+      ) : (
+        <View style={{ width: "100%", aspectRatio: 3 / 4, justifyContent: "center", alignItems: "center" }} >
+          <Text style={{ fontSize: 16, color: textColor, textAlign: "center" }}>暂无图片</Text>
+        </View>
+      )}
       <View style={{ padding: 4 }}>
         <Text
           style={{

@@ -1,6 +1,8 @@
-import React from 'react'
+import { supabase } from '@/lib/supabase'
+import React, { useState } from 'react'
 import { Controller, SubmitHandler, useForm } from "react-hook-form"
 import { Text, View } from 'react-native'
+import Toast from 'react-native-toast-message'
 import { Button, Input, Label, RadioGroup, SizeTokens } from 'tamagui'
 
 type Inputs = {
@@ -30,11 +32,11 @@ export function RadioGroupItemWithLabel(props: {
 }
 
 const AddVideoModal = () => {
-
+  const [loading, setLoading] = useState(false);
   const {
     control,
     handleSubmit,
-    watch,
+    reset,
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
@@ -44,7 +46,28 @@ const AddVideoModal = () => {
       area: 'japan',
     },
   })
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data)
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setLoading(true);
+    const id = await supabase.from("videos").select("id").order("id", { ascending: false }).limit(1).single()
+    console.log(id);
+    await supabase
+      .from("videos")
+      .insert({
+        id: Number(id.data?.id || 0) + 1,
+        title: data.title,
+        total: Number(data.total),
+        type: data.type,
+        area: data.area,
+      });
+    Toast.show({
+      type: "success",
+      text1: "提醒",
+      text2: "待观看视频添加成功~",
+      topOffset: 60,
+    });
+    reset();
+    setLoading(false);
+  }
 
   return (
     <View style={{ padding: 12, gap: 12 }}>
@@ -127,7 +150,7 @@ const AddVideoModal = () => {
         <Text style={{ color: 'red' }}>视频所属地区不能为空</Text>
       )}
 
-      <Button size="$4" onPress={handleSubmit(onSubmit)}>
+      <Button size="$4" onPress={handleSubmit(onSubmit)} disabled={loading}>
         提交
       </Button>
     </View>
