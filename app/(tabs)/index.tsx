@@ -309,8 +309,9 @@ export interface Video {
   total: number;
   status: string;
   current: number;
-  finishedAt?: string;
-  type: "Anime" | "Movie" | "Documentary";
+  created_at: string;
+  finished_at?: string;
+  type: "Anime" | "Movie" | "Documentary" | "TV";
   loopCount?: number;
 }
 

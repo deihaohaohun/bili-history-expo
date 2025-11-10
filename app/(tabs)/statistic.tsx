@@ -1,39 +1,61 @@
-import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
+import { Video } from './index';
+
+type VideoType = Partial<Video>
 
 export default function StatisticScreen() {
-  const [pieData, setPieData] = useState([
+  const [videos, setVideos] = useState<VideoType[]>([]);
+  const animeVideos = videos.filter((video) => video.type === "Anime");
+  const movieVideos = videos.filter((video) => video.type === "Movie");
+  const tvVideos = videos.filter((video) => video.type === "TV");
+  const documentaryVideos = videos.filter((video) => video.type === "Documentary");
+  const [focused, setFocused] = useState(0);
+  const pieData = [
     {
-      value: 47,
+      value: animeVideos.length,
       color: "#009FFF",
       gradientCenterColor: "#006DFF",
       title: "动漫",
-      focused: true,
+      focused: focused === 0,
     },
     {
-      value: 40,
+      value: tvVideos.length,
       color: "#93FCF8",
       gradientCenterColor: "#3BE9DE",
       title: "电视剧",
-      focused: false,
+      focused: focused === 1,
     },
     {
-      value: 16,
+      value: movieVideos.length,
       color: "#BDB2FA",
       gradientCenterColor: "#8F80F3",
       title: "电影",
-      focused: false,
+      focused: focused === 2,
     },
     {
-      value: 3,
+      value: documentaryVideos.length,
       color: "#FFA5BA",
       gradientCenterColor: "#FF7F97",
       title: "纪录片",
-      focused: false,
+      focused: focused === 3,
     },
-  ]);
+  ];
   const centerData = pieData.find((data) => data.focused);
+  const videosFinishedInThisYear = videos.filter((video) => dayjs(video.finished_at ? +video.finished_at : 0).year() === dayjs().year());
+  const videosAddedInThisYear = videos.filter((video) => dayjs(video.created_at).year() === dayjs().year());
+
+  useEffect(() => {
+    supabase
+      .from("videos")
+      .select("id,type,created_at,finished_at")
+      .then((res) => {
+        setVideos(res.data as VideoType[]);
+      });
+  }, []);
 
   const renderDot = (data: any) => {
     return (
@@ -61,7 +83,7 @@ export default function StatisticScreen() {
       >
         {renderDot(data)}
         <Text style={{ color: "white" }}>
-          {data.title} ({data.value}):{" "}
+          {data.title}:
           {(
             (data.value / pieData.reduce((pre, next) => pre + next.value, 0)) *
             100
@@ -120,11 +142,7 @@ export default function StatisticScreen() {
             innerRadius={60}
             innerCircleColor={"#333"}
             onPress={(data: any, idx: number) => {
-              // 把对应索引的数据的 focused 属性设置为 true, 其他的设置为 false
-              pieData.forEach((item, index) => {
-                item.focused = index === idx;
-              });
-              setPieData([...pieData]);
+              setFocused(idx);
             }}
             centerLabelComponent={() => {
               return (
@@ -134,7 +152,7 @@ export default function StatisticScreen() {
                   <Text
                     style={{ fontSize: 22, color: "white", fontWeight: "bold" }}
                   >
-                    {centerData?.value}%
+                    {centerData?.value}
                   </Text>
                   <Text style={{ fontSize: 14, color: "white" }}>
                     {centerData?.title}
@@ -145,6 +163,27 @@ export default function StatisticScreen() {
           />
         </View>
         {renderLegendComponent()}
+      </View>
+
+      <View
+        style={{
+          margin: 12,
+          padding: 12,
+          borderRadius: 12,
+          backgroundColor: "#333",
+        }}
+      >
+        <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
+          成就统计
+        </Text>
+        <View style={{ padding: 20, alignItems: "center" }}>
+          <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
+            这一年已经添加了 {videosAddedInThisYear.length} 部视频~
+          </Text>
+          <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
+            不知不觉这一年已经看完了 {videosFinishedInThisYear.length} 部视频~
+          </Text>
+        </View>
       </View>
     </View>
   );
