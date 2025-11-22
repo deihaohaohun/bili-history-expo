@@ -11,7 +11,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { defaultConfig } from "@tamagui/config/v4";
 import Toast from "react-native-toast-message";
-import { createTamagui, TamaguiProvider } from "tamagui";
+import { createTamagui, TamaguiProvider, Theme } from "tamagui";
 
 // Tamagui 配置
 const config = createTamagui(defaultConfig);
@@ -34,16 +34,18 @@ export default function RootLayout() {
   }
 
   return (
-    <TamaguiProvider config={config}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="addVideoModal" options={{ title: '添加待观看视频', presentation: 'modal' }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-        <Toast />
-      </ThemeProvider>
+    <TamaguiProvider config={config} >
+      <Theme name={colorScheme === "dark" ? "dark" : "light"}>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="addVideoModal" options={{ title: '添加待观看视频', presentation: 'modal' }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+          <Toast />
+        </ThemeProvider>
+      </Theme>
     </TamaguiProvider>
   );
 }

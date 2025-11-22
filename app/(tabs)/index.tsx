@@ -317,13 +317,13 @@ export interface Video {
 
 export default function App() {
   const router = useRouter();
-
+  const textColor = useThemeColor({}, "text");
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
 
   return (<>
     <Stack.Screen options={{
-      headerRight: () => <Entypo style={{ marginRight: 12 }} name="squared-plus" size={24} color="black" onPress={() => { router.navigate('/addVideoModal') }} />
+      headerRight: () => <Entypo style={{ marginRight: 12, color: textColor }} name="squared-plus" size={24} color="black" onPress={() => { router.navigate('/addVideoModal') }} />
     }} />
 
     <TabView

@@ -1,3 +1,4 @@
+import { useThemeColor } from '@/hooks/useThemeColor'
 import { supabase } from '@/lib/supabase'
 import React, { useState } from 'react'
 import { Controller, SubmitHandler, useForm } from "react-hook-form"
@@ -32,6 +33,7 @@ export function RadioGroupItemWithLabel(props: {
 }
 
 const AddVideoModal = () => {
+  const textColor = useThemeColor({}, "text");
   const [loading, setLoading] = useState(false);
   const {
     control,
@@ -71,7 +73,7 @@ const AddVideoModal = () => {
 
   return (
     <View style={{ padding: 12, gap: 12 }}>
-      <Label>视频名称</Label>
+      <Label style={{ color: textColor }}>视频名称</Label>
       <Controller
         control={control}
         rules={{
@@ -85,7 +87,7 @@ const AddVideoModal = () => {
       {errors.title?.type === "required" && (
         <Text style={{ color: 'red' }}>视频名称不能为空</Text>
       )}
-      <Label>视频剧集总数</Label>
+      <Label style={{ color: textColor }}>视频剧集总数</Label>
       <Controller
         control={control}
         rules={{
@@ -108,7 +110,7 @@ const AddVideoModal = () => {
       {errors.total?.type === "required" && (
         <Text style={{ color: 'red' }}>剧集数必须在 1 到 999 之间</Text>
       )}
-      <Label>视频类型</Label>
+      <Label style={{ color: textColor }}>视频类型</Label>
       <Controller
         control={control}
         rules={{
@@ -129,7 +131,7 @@ const AddVideoModal = () => {
       {errors.type?.type === "required" && (
         <Text style={{ color: 'red' }}>视频类型不能为空</Text>
       )}
-      <Label>视频所属地区</Label>
+      <Label style={{ color: textColor }}>视频所属地区</Label>
       <Controller
         control={control}
         rules={{
