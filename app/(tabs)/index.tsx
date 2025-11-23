@@ -13,7 +13,7 @@ import { FlashList } from "@shopify/flash-list";
 import dayjs from "dayjs";
 import { Stack, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, RefreshControl, useWindowDimensions, View } from "react-native";
+import { Pressable, RefreshControl, useColorScheme, useWindowDimensions, View } from "react-native";
 import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
@@ -38,6 +38,9 @@ const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
   const currentVideo = videos.find((video) => video.id === id)!;
   const [current, setCurrent] = useState(0);
   const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
+  const isDark = useColorScheme();
+
   const [status] = useState(queryStatus);
   const [loading, setLoading] = useState(true);
   const [processLoading, setProcessLoading] = useState(false);
@@ -130,26 +133,7 @@ const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
       .update({
         status: "done",
         finished_at: dayjs().valueOf() + '',
-        // TODO: 增加再次观看功能的时候需要循环次数增加逻辑
         loop_count: 1
-      })
-      .eq("id", currentVideo.id);
-    Toast.show({
-      type: "success",
-      text1: "提醒",
-      text2: "成就 +1, 快去解锁更多成就吧~",
-      topOffset: 60,
-    });
-    onRefresh();
-    bottomSheetModalRef.current?.close();
-  };
-  const markMovieFinished = async () => {
-    await supabase
-      .from("videos")
-      .update({
-        status: "done",
-        current: 1,
-        finished_at: dayjs().valueOf() + '',
       })
       .eq("id", currentVideo.id);
     Toast.show({
@@ -206,8 +190,14 @@ const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
           ref={bottomSheetModalRef}
           enableDismissOnClose
           backdropComponent={renderBackdrop}
+          backgroundStyle={{
+            backgroundColor: backgroundColor,
+          }}
+          handleIndicatorStyle={{
+            backgroundColor: isDark ? '#444' : '#ccc',
+          }}
         >
-          <BottomSheetView>
+          <BottomSheetView style={{ backgroundColor: backgroundColor }}>
             <Text style={{ fontSize: 20, textAlign: "center" }}>
               {currentVideo?.title}
             </Text>
@@ -272,14 +262,10 @@ const VideoList = ({ queryStatus = "doing" }: { queryStatus?: string }) => {
               {currentVideo?.status === "todo" && (
                 <Button
                   size="$4"
-                  onPress={() =>
-                    currentVideo.type === "Anime"
-                      ? startWatching()
-                      : markMovieFinished()
-                  }
+                  onPress={() => startWatching()}
                   style={{ flex: 1 }}
                 >
-                  {currentVideo.type === "Anime" ? "开始观看" : "标记为看过"}
+                  开始观看
                 </Button>
               )}
             </View>

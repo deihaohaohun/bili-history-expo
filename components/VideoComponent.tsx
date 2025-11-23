@@ -56,7 +56,7 @@ const VideoComponent = ({ item }: { item: VideoType }) => {
               textAlign: "right",
             }}
           >
-            当前看到 {item.current} 话
+            当前看到 {item.current} {item.type === "Anime" ? "话" : "集"}
           </Text>
         )}
         {item.status === "done" && (
