@@ -3,16 +3,18 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
-import { Video } from './index';
+import { Video } from "./index";
 
-type VideoType = Partial<Video>
+type VideoType = Partial<Video>;
 
 export default function StatisticScreen() {
   const [videos, setVideos] = useState<VideoType[]>([]);
   const animeVideos = videos.filter((video) => video.type === "Anime");
   const movieVideos = videos.filter((video) => video.type === "Movie");
   const tvVideos = videos.filter((video) => video.type === "TV");
-  const documentaryVideos = videos.filter((video) => video.type === "Documentary");
+  const documentaryVideos = videos.filter(
+    (video) => video.type === "Documentary",
+  );
   const [focused, setFocused] = useState(0);
   const pieData = [
     {
@@ -44,9 +46,16 @@ export default function StatisticScreen() {
       focused: focused === 3,
     },
   ];
+  const totalVideos = pieData.reduce((pre, next) => pre + next.value, 0);
   const centerData = pieData.find((data) => data.focused);
-  const videosFinishedInThisYear = videos.filter((video) => dayjs(video.finished_at ? +video.finished_at : 0).year() === dayjs().year());
-  const videosAddedInThisYear = videos.filter((video) => dayjs(video.created_at).year() === dayjs().year());
+  const videosFinishedInThisYear = videos.filter(
+    (video) =>
+      dayjs(video.finished_at ? +video.finished_at : 0).year() ===
+      dayjs().year(),
+  );
+  const videosAddedInThisYear = videos.filter(
+    (video) => dayjs(video.created_at).year() === dayjs().year(),
+  );
 
   useEffect(() => {
     supabase
@@ -77,18 +86,13 @@ export default function StatisticScreen() {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "center",
           width: 160,
-          marginRight: 20,
         }}
       >
         {renderDot(data)}
         <Text style={{ color: "white" }}>
-          {data.title}:
-          {(
-            (data.value / pieData.reduce((pre, next) => pre + next.value, 0)) *
-            100
-          ).toFixed(2)}
-          %
+          {data.title}:{((data.value / totalVideos) * 100).toFixed(2)}%
         </Text>
       </View>
     );
@@ -178,10 +182,10 @@ export default function StatisticScreen() {
         </Text>
         <View style={{ padding: 20, alignItems: "center" }}>
           <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
-            这一年已经添加了 {videosAddedInThisYear.length} 部视频~
+            今年添加了 {videosAddedInThisYear.length} 部视频~
           </Text>
           <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
-            不知不觉这一年已经看完了 {videosFinishedInThisYear.length} 部视频~
+            不知不觉已经看完了 {videosFinishedInThisYear.length} 部视频~
           </Text>
         </View>
       </View>

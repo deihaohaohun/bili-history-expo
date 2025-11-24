@@ -1,26 +1,28 @@
-import { useThemeColor } from '@/hooks/useThemeColor'
-import { supabase } from '@/lib/supabase'
-import React, { useState } from 'react'
-import { Controller, SubmitHandler, useForm } from "react-hook-form"
-import { Text, View } from 'react-native'
-import Toast from 'react-native-toast-message'
-import { Button, Input, Label, RadioGroup, SizeTokens } from 'tamagui'
+import FormErrorTip from "@/components/FormErrorTip";
+import { COUNTRIES, VIDEO_TYPES } from "@/constants/Countries";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { supabase } from "@/lib/supabase";
+import React, { useState } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { View } from "react-native";
+import Toast from "react-native-toast-message";
+import { Button, Input, Label, RadioGroup, SizeTokens } from "tamagui";
 
 type Inputs = {
-  title: string
-  total: string
-  type: string
-  area: string
-}
+  title: string;
+  total: string;
+  type: string;
+  area: string;
+};
 
 export function RadioGroupItemWithLabel(props: {
-  size: SizeTokens
-  value: string
-  label: string
+  size: SizeTokens;
+  value: string;
+  label: string;
 }) {
-  const id = `radiogroup-${props.value}`
+  const id = `radiogroup-${props.value}`;
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
       <RadioGroup.Item value={props.value} id={id} size={props.size}>
         <RadioGroup.Indicator />
       </RadioGroup.Item>
@@ -29,7 +31,7 @@ export function RadioGroupItemWithLabel(props: {
         {props.label}
       </Label>
     </View>
-  )
+  );
 }
 
 const AddVideoModal = () => {
@@ -42,25 +44,28 @@ const AddVideoModal = () => {
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
-      title: '',
-      total: '',
-      type: 'Anime',
-      area: 'japan',
+      title: "",
+      total: "",
+      type: "Anime",
+      area: "japan",
     },
-  })
+  });
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setLoading(true);
-    const id = await supabase.from("videos").select("id").order("id", { ascending: false }).limit(1).single()
-    console.log(id);
-    await supabase
+    const id = await supabase
       .from("videos")
-      .insert({
-        id: Number(id.data?.id || 0) + 1,
-        title: data.title,
-        total: Number(data.total),
-        type: data.type,
-        area: data.area,
-      });
+      .select("id")
+      .order("id", { ascending: false })
+      .limit(1)
+      .single();
+    console.log(id);
+    await supabase.from("videos").insert({
+      id: Number(id.data?.id || 0) + 1,
+      title: data.title,
+      total: Number(data.total),
+      type: data.type,
+      area: data.area,
+    });
     Toast.show({
       type: "success",
       text1: "提醒",
@@ -69,7 +74,7 @@ const AddVideoModal = () => {
     });
     reset();
     setLoading(false);
-  }
+  };
 
   return (
     <View style={{ padding: 12, gap: 12 }}>
@@ -80,12 +85,18 @@ const AddVideoModal = () => {
           required: true,
         }}
         render={({ field: { onChange, onBlur, value } }) => (
-          <Input size="$3" placeholder="请输入视频名称" onBlur={onBlur} onChangeText={onChange} value={value} />
+          <Input
+            size="$3"
+            placeholder="请输入视频名称"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+          />
         )}
         name="title"
       />
       {errors.title?.type === "required" && (
-        <Text style={{ color: 'red' }}>视频名称不能为空</Text>
+        <FormErrorTip tip="视频名称不能为空" />
       )}
       <Label style={{ color: textColor }}>视频剧集总数</Label>
       <Controller
@@ -93,22 +104,32 @@ const AddVideoModal = () => {
         rules={{
           required: true,
           min: 1,
-          max: 999,
+          max: 9999,
         }}
         render={({ field: { onChange, onBlur, value } }) => (
-          <Input size="$3" placeholder="请输入视频剧集总数" keyboardType="number-pad" onBlur={onBlur} onChangeText={(text) => {
-            // 自定义逻辑 1：只允许数字
-            const numericValue = text.replace(/[^0-9]/g, '');
-            // 自定义逻辑 2：限制最大值 999
-            const finalValue = numericValue === '' ? '' : Math.min(Number(numericValue), 999).toString();
-            // 最后调用 react-hook-form 的 onChange 更新表单状态
-            onChange(finalValue);
-          }} value={value} />
+          <Input
+            size="$3"
+            placeholder="请输入视频剧集总数"
+            keyboardType="number-pad"
+            onBlur={onBlur}
+            onChangeText={(text) => {
+              // 自定义逻辑 1：只允许数字
+              const numericValue = text.replace(/[^0-9]/g, "");
+              // 自定义逻辑 2：限制最大值 999
+              const finalValue =
+                numericValue === ""
+                  ? ""
+                  : Math.min(Number(numericValue), 9999).toString();
+              // 最后调用 react-hook-form 的 onChange 更新表单状态
+              onChange(finalValue);
+            }}
+            value={value}
+          />
         )}
         name="total"
       />
       {errors.total?.type === "required" && (
-        <Text style={{ color: 'red' }}>剧集数必须在 1 到 999 之间</Text>
+        <FormErrorTip tip="剧集数必须在 1 到 9999 之间" />
       )}
       <Label style={{ color: textColor }}>视频类型</Label>
       <Controller
@@ -117,19 +138,31 @@ const AddVideoModal = () => {
           required: true,
         }}
         render={({ field: { onChange, onBlur, value } }) => (
-          <RadioGroup aria-labelledby="请选择视频类型" defaultValue="Anime" onValueChange={onChange} onBlur={onBlur} value={value}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <RadioGroupItemWithLabel size="$4" value="Anime" label="动漫" />
-              <RadioGroupItemWithLabel size="$4" value="Movie" label="电影" />
-              <RadioGroupItemWithLabel size="$4" value="TVSeries" label="电视剧" />
-              <RadioGroupItemWithLabel size="$4" value="Documentary" label="纪录片" />
+          <RadioGroup
+            aria-labelledby="请选择视频类型"
+            defaultValue="Anime"
+            onValueChange={onChange}
+            onBlur={onBlur}
+            value={value}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              {VIDEO_TYPES.map((type) => (
+                <RadioGroupItemWithLabel
+                  key={type.label}
+                  size="$4"
+                  value={type.value}
+                  label={type.label}
+                />
+              ))}
             </View>
           </RadioGroup>
         )}
         name="type"
       />
       {errors.type?.type === "required" && (
-        <Text style={{ color: 'red' }}>视频类型不能为空</Text>
+        <FormErrorTip tip="视频类型不能为空" />
       )}
       <Label style={{ color: textColor }}>视频所属地区</Label>
       <Controller
@@ -138,25 +171,38 @@ const AddVideoModal = () => {
           required: true,
         }}
         render={({ field: { onChange, onBlur, value } }) => (
-          <RadioGroup aria-labelledby="请选择视频所属地区" defaultValue="japan" onValueChange={onChange} onBlur={onBlur} value={value}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <RadioGroupItemWithLabel size="$4" value="japan" label="日本" />
-              <RadioGroupItemWithLabel size="$4" value="china" label="中国" />
-              <RadioGroupItemWithLabel size="$4" value="america" label="美国" />
+          <RadioGroup
+            aria-labelledby="请选择视频所属地区"
+            defaultValue="japan"
+            onValueChange={onChange}
+            onBlur={onBlur}
+            value={value}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              {COUNTRIES.map((country) => (
+                <RadioGroupItemWithLabel
+                  key={country.label}
+                  size="$4"
+                  value={country.value}
+                  label={country.label}
+                />
+              ))}
             </View>
           </RadioGroup>
         )}
         name="area"
       />
       {errors.area?.type === "required" && (
-        <Text style={{ color: 'red' }}>视频所属地区不能为空</Text>
+        <FormErrorTip tip="视频所属地区不能为空" />
       )}
 
       <Button size="$4" onPress={handleSubmit(onSubmit)} disabled={loading}>
         提交
       </Button>
     </View>
-  )
-}
+  );
+};
 
-export default AddVideoModal
+export default AddVideoModal;
