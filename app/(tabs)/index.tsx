@@ -118,8 +118,6 @@ const VideoList = ({
     if (status !== "done") return null;
     return new Fuse<Video>(videos, {
       keys: ["title"],
-      threshold: 0.35,
-      ignoreLocation: true,
     });
   }, [status, videos]);
 
