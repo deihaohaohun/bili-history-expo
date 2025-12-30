@@ -2,7 +2,7 @@ import { getVideoList } from "@/apis/video";
 import VideoComponent from "@/components/VideoComponent";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { supabase } from "@/lib/supabase";
-import Entypo from '@expo/vector-icons/Entypo';
+import Entypo from "@expo/vector-icons/Entypo";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -16,21 +16,26 @@ import dayjs from "dayjs";
 import { Stack, useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, RefreshControl, useColorScheme, useWindowDimensions, View } from "react-native";
 import {
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
+  Platform,
+  Pressable,
+  RefreshControl,
+  useColorScheme,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { Button, Input, Text } from "tamagui";
 
-import { TabBar, TabView } from 'react-native-tab-view';
+import { TabBar, TabView } from "react-native-tab-view";
 
 const renderTabBar = (props: any) => (
   <TabBar
     {...props}
-    indicatorStyle={{ backgroundColor: 'white' }}
-    style={{ backgroundColor: '#509EE2' }}
+    indicatorStyle={{ backgroundColor: "white" }}
+    style={{ backgroundColor: "#509EE2" }}
   />
 );
 
@@ -189,8 +194,8 @@ const VideoList = ({
       .from("videos")
       .update({
         status: "done",
-        finished_at: dayjs().valueOf() + '',
-        loop_count: 1
+        finished_at: dayjs().valueOf() + "",
+        loop_count: 1,
       })
       .eq("id", currentVideo.id);
     Toast.show({
@@ -224,7 +229,9 @@ const VideoList = ({
           <FlashList
             data={pagedVideos}
             numColumns={3}
-            contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? tabBarHeight : 0 }}
+            contentContainerStyle={{
+              paddingBottom: Platform.OS === "ios" ? tabBarHeight : 0,
+            }}
             renderItem={({ item }: { item: Video }) => (
               <Pressable
                 onPress={() => {
@@ -264,8 +271,8 @@ const VideoList = ({
                   {loading
                     ? "正在加载中..."
                     : hasMore
-                      ? `已加载 ${pagedVideos.length}/${filteredVideos.length}`
-                      : '已加载所有数据'}
+                    ? `已加载 ${pagedVideos.length}/${filteredVideos.length}`
+                    : "已加载所有数据"}
                 </Text>
               </View>
             }
@@ -275,14 +282,14 @@ const VideoList = ({
         <BottomSheetModal
           ref={bottomSheetModalRef}
           enableDismissOnClose
-          bottomInset={Platform.OS === 'ios' ? tabBarHeight : 0}
+          bottomInset={Platform.OS === "ios" ? tabBarHeight : 0}
           topInset={insets.top}
           backdropComponent={renderBackdrop}
           backgroundStyle={{
             backgroundColor: backgroundColor,
           }}
           handleIndicatorStyle={{
-            backgroundColor: isDark ? '#444' : '#ccc',
+            backgroundColor: isDark ? "#444" : "#ccc",
           }}
         >
           <BottomSheetView style={{ backgroundColor: backgroundColor }}>
@@ -299,38 +306,43 @@ const VideoList = ({
                 flexGrow: 0,
               }}
             >
-              {currentVideo?.status === "doing" &&
-                (currentVideo.current < currentVideo.total ? (
-                  <View style={{ width: "100%", gap: 12 }}>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        width: "100%",
-                        gap: 8,
-                      }}
+              {currentVideo?.status === "doing" && (
+                <View style={{ width: "100%", gap: 12 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      width: "100%",
+                      gap: 8,
+                    }}
+                  >
+                    <Text fontSize={16}>当前看到第</Text>
+                    <Input
+                      style={{ flex: 1 }}
+                      size="$4"
+                      borderWidth={2}
+                      value={current + ""}
+                      disabled
+                    />
+                    <Text>{currentVideo.type === "Anime" ? "话" : "集"}</Text>
+                  </View>
+                  {currentVideo.current < currentVideo.total ? (
+                    <Button
+                      size="$4"
+                      onPress={addVideoProgress}
+                      disabled={processLoading}
                     >
-                      <Text fontSize={16}>当前看到第</Text>
-                      <Input
-                        style={{ flex: 1 }}
-                        size="$4"
-                        borderWidth={2}
-                        value={current + ""}
-                        disabled
-                      />
-                      <Text>{currentVideo.type === "Anime" ? "话" : "集"}</Text>
-                    </View>
-                    <Button size="$4" onPress={addVideoProgress} disabled={processLoading}>
                       <Text>
-                        标记本{currentVideo.type === "Anime" ? "话" : "集"}为已看过
+                        标记第 {current} {currentVideo.type === "Anime" ? "话" : "集"} 为已看过
                       </Text>
                     </Button>
-                  </View>
-                ) : (
-                  <Button onPress={markFinished} style={{ flex: 1 }}>
-                    标记为已看过
-                  </Button>
-                ))}
+                  ) : (
+                    <Button onPress={markFinished} style={{ flex: 1 }}>
+                      <Text>标记为已看过</Text>
+                    </Button>
+                  )}
+                </View>
+              )}
               {currentVideo?.status === "done" && (
                 <Button
                   size="$4"
@@ -361,14 +373,16 @@ const VideoList = ({
         </BottomSheetModal>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
-  )
-}
+  );
+};
 
 const routes: Route[] = [
-  { key: 'doing', title: '正在看' },
-  { key: 'todo', title: '未观看' },
-  { key: 'done', title: '已完成' },
+  { key: "doing", title: "正在看" },
+  { key: "todo", title: "未观看" },
+  { key: "done", title: "已完成" },
 ];
+
+const videoTypes = ["Anime", "Movie", "Documentary", "TV"];
 
 export interface Video {
   id: number;
@@ -379,7 +393,7 @@ export interface Video {
   current: number;
   created_at: string;
   finished_at?: string;
-  type: "Anime" | "Movie" | "Documentary" | "TV";
+  type: (typeof videoTypes)[number];
   loopCount?: number;
   area?: string;
 }
@@ -389,7 +403,9 @@ export default function App() {
   const textColor = useThemeColor({}, "text");
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
-  const [refreshTokens, setRefreshTokens] = useState<Record<RefreshKey, number>>({
+  const [refreshTokens, setRefreshTokens] = useState<
+    Record<RefreshKey, number>
+  >({
     doing: 0,
     todo: 0,
     done: 0,
@@ -439,22 +455,39 @@ export default function App() {
         />
       );
     },
-    [refreshTokens.doing, refreshTokens.done, refreshTokens.todo, requestRefresh]
+    [
+      refreshTokens.doing,
+      refreshTokens.done,
+      refreshTokens.todo,
+      requestRefresh,
+    ]
   );
 
-  return (<>
-    <Stack.Screen options={{
-      headerRight: () => <Entypo style={{ marginRight: 12, color: textColor }} name="squared-plus" size={24} color="black" onPress={() => { router.navigate('/addVideoModal') }} />
-    }} />
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Entypo
+              style={{ marginRight: 12, color: textColor }}
+              name="squared-plus"
+              size={24}
+              color="black"
+              onPress={() => {
+                router.navigate("/addVideoModal");
+              }}
+            />
+          ),
+        }}
+      />
 
-    <TabView
-      renderTabBar={renderTabBar}
-      navigationState={{ index, routes }}
-      renderScene={renderScene}
-      onIndexChange={setIndex}
-      initialLayout={{ width: layout.width }}
-    />
-  </>
-
+      <TabView
+        renderTabBar={renderTabBar}
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+      />
+    </>
   );
 }
